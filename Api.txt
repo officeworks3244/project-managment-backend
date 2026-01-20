@@ -1,0 +1,181 @@
+Below is a **clean, professional REST API list** for your **Project Management Portal (Node.js + Express + MySQL)**.
+This is **backend-ready**, frontend can consume these with **fetch()** easily.
+
+---
+
+# 📡 Project Management Portal – API List
+
+**Base URL**
+
+```
+/api/v1
+```
+
+---
+
+## 🔐 1️⃣ Authentication APIs
+
+| Method | Endpoint                | Description             |
+| ------ | ----------------------- | ----------------------- |
+| POST   | `/auth/login`           | User login              |
+| POST   | `/auth/logout`          | Logout user             |
+| POST   | `/auth/forgot-password` | Send reset link         |
+| POST   | `/auth/reset-password`  | Reset password          |
+| GET    | `/auth/me`              | Get logged-in user info |
+
+---
+
+## 👥 2️⃣ Roles & Permissions APIs (Admin / Super Admin)
+
+### Roles
+
+| Method | Endpoint     | Description     |
+| ------ | ------------ | --------------- |
+| GET    | `/roles`     | Get all roles   |
+| POST   | `/roles`     | Create new role |
+| PUT    | `/roles/:id` | Update role     |
+| DELETE | `/roles/:id` | Delete role     |
+
+### Permissions
+
+| Method | Endpoint                 | Description                |
+| ------ | ------------------------ | -------------------------- |
+| GET    | `/permissions`           | Get all permissions        |
+| POST   | `/permissions`           | Create permission          |
+| POST   | `/roles/:id/permissions` | Assign permissions to role |
+
+---
+
+## 🧑 3️⃣ Users APIs (Admin)
+
+| Method | Endpoint     | Description           |
+| ------ | ------------ | --------------------- |
+| GET    | `/users`     | Get all users         |
+| GET    | `/users/:id` | Get single user       |
+| POST   | `/users`     | Create user           |
+| PUT    | `/users/:id` | Update user           |
+| DELETE | `/users/:id` | Disable / delete user |
+
+---
+
+## 📁 4️⃣ Projects APIs
+
+| Method | Endpoint        | Description        |
+| ------ | --------------- | ------------------ |
+| GET    | `/projects`     | Get all projects   |
+| GET    | `/projects/:id` | Get project detail |
+| POST   | `/projects`     | Create project     |
+| PUT    | `/projects/:id` | Update project     |
+| DELETE | `/projects/:id` | Delete project     |
+
+### Project Members
+
+| Method | Endpoint                        | Description         |
+| ------ | ------------------------------- | ------------------- |
+| GET    | `/projects/:id/members`         | Get project members |
+| POST   | `/projects/:id/members`         | Add member          |
+| DELETE | `/projects/:id/members/:userId` | Remove member       |
+
+---
+
+## ✅ 5️⃣ Tasks APIs
+
+| Method | Endpoint     | Description           |
+| ------ | ------------ | --------------------- |
+| GET    | `/tasks`     | Get all tasks (admin) |
+| GET    | `/tasks/my`  | Logged-in user tasks  |
+| GET    | `/tasks/:id` | Task detail           |
+| POST   | `/tasks`     | Create task           |
+| PUT    | `/tasks/:id` | Update task           |
+| DELETE | `/tasks/:id` | Delete task           |
+
+### Task Status
+
+| Method | Endpoint              | Description        |
+| ------ | --------------------- | ------------------ |
+| PATCH  | `/tasks/:id/status`   | Update task status |
+| PATCH  | `/tasks/:id/priority` | Update priority    |
+
+---
+
+## 💬 6️⃣ Task Comments APIs
+
+| Method | Endpoint              | Description       |
+| ------ | --------------------- | ----------------- |
+| GET    | `/tasks/:id/comments` | Get task comments |
+| POST   | `/tasks/:id/comments` | Add comment       |
+| DELETE | `/comments/:id`       | Delete comment    |
+
+---
+
+## 📎 7️⃣ File Upload APIs
+
+| Method | Endpoint        | Description   |
+| ------ | --------------- | ------------- |
+| POST   | `/files/upload` | Upload file   |
+| GET    | `/files/:id`    | Get file info |
+| DELETE | `/files/:id`    | Delete file   |
+
+> File storage: Cloudinary / S3 (recommended)
+
+---
+
+## 📊 8️⃣ Reports & Analytics APIs
+
+| Method | Endpoint                    | Description      |
+| ------ | --------------------------- | ---------------- |
+| GET    | `/reports/dashboard`        | Dashboard stats  |
+| GET    | `/reports/project-progress` | Project progress |
+| GET    | `/reports/team-performance` | Team performance |
+| GET    | `/reports/task-summary`     | Task analytics   |
+
+---
+
+## ⚙️ 9️⃣ Settings / Profile APIs
+
+| Method | Endpoint                   | Description     |
+| ------ | -------------------------- | --------------- |
+| GET    | `/profile`                 | Get profile     |
+| PUT    | `/profile`                 | Update profile  |
+| PUT    | `/profile/change-password` | Change password |
+
+---
+
+## 📜 🔟 Activity Logs APIs
+
+| Method | Endpoint            | Description     |
+| ------ | ------------------- | --------------- |
+| GET    | `/activity-logs`    | Get system logs |
+| GET    | `/activity-logs/me` | User activity   |
+
+---
+
+## 🔐 Security Middleware (Important)
+
+* JWT Authentication
+* Role-based authorization
+* Input validation
+* Rate limiting
+
+---
+
+## ✅ API Naming Benefits
+
+✔ REST standard
+✔ Frontend friendly
+✔ Easy RBAC enforcement
+✔ Scalable & maintainable
+
+---
+
+## 🔜 Next (If You Want)
+
+I can give you:
+
+* ✅ **Controller + route folder structure**
+* ✅ **RBAC middleware code**
+* ✅ **Prisma / Sequelize models**
+* ✅ **Seed script (roles, admin user)**
+* ✅ **Frontend fetch examples**
+
+Just tell me 👍
