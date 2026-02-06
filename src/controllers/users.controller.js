@@ -1,6 +1,7 @@
 import { pool } from "../../config/db.js";
 import { hashPassword } from "../../utils/password.js";
 import { logActivity } from "../../utils/activityLogger.js";
+import { emitToUser } from "../services/socket.service.js";
 
 
 /**
@@ -213,7 +214,7 @@ export const updateUser = async (req, res) => {
 
   try {
     const [user] = await pool.query(
-      `SELECT id FROM users WHERE id = ?`,
+      `SELECT id, status FROM users WHERE id = ?`,
       [id]
     );
 
@@ -238,6 +239,13 @@ export const updateUser = async (req, res) => {
 
     // Log activity
     await logActivity(req.user.id, "UPDATE", "User", id);
+
+    // 🔔 Force logout if user became inactive
+    if (status === "inactive" && user[0].status !== "inactive") {
+      emitToUser(Number(id), "auth:logout", {
+        reason: "inactive",
+      });
+    }
 
     res.json({
       success: true,
@@ -278,6 +286,11 @@ export const deleteUser = async (req, res) => {
 
     // Log activity
     await logActivity(req.user.id, "DELETE", "User", id);
+
+    // 🔔 Force logout for disabled user
+    emitToUser(Number(id), "auth:logout", {
+      reason: "inactive",
+    });
 
     res.json({
       success: true,

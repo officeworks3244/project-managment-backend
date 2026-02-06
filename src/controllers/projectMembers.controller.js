@@ -188,6 +188,22 @@ export const removeProjectMember = async (req, res) => {
     // Log activity
     await logActivity(req.user.id, "DELETE", "ProjectMember", memberRecord.id);
 
+    // 🔔 Notify removed member
+    const [projectRows] = await pool.query(
+      `SELECT name FROM projects WHERE id = ? LIMIT 1`,
+      [projectId]
+    );
+    const projectName = projectRows.length ? projectRows[0].name : "project";
+
+    await createNotification({
+      userIds: [Number(userId)],
+      title: "Removed from project",
+      message: `You have been removed from "${projectName}"`,
+      type: "MEMBER_REMOVED",
+      entityType: "ProjectMember",
+      entityId: memberRecord.id,
+    });
+
     res.json({
       success: true,
       message: "Member removed from project successfully",

@@ -44,7 +44,6 @@ export const login = async (req, res) => {
         ON p.id = rp.permission_id
 
       WHERE u.email = ?
-        AND u.status = 'active'
 
       GROUP BY u.id
       LIMIT 1
@@ -61,6 +60,13 @@ export const login = async (req, res) => {
     }
 
     const user = rows[0];
+
+    if (user.status !== "active") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is inactive. Please contact admin.",
+      });
+    }
 
     /* 🔹 Password check */
     const isMatch = await comparePassword(password, user.password_hash);

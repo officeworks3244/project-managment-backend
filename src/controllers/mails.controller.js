@@ -92,6 +92,19 @@ export const sendMail = async (req, res) => {
       thread_id: thread.insertId
     });
 
+    // Optional unified update event (for clients listening only to mail:update)
+    emitToUsers(recipients, "mail:update", {
+      mail_id: mail.insertId,
+      thread_id: thread.insertId,
+      action: "received"
+    });
+
+    emitToUser(senderId, "mail:update", {
+      mail_id: mail.insertId,
+      thread_id: thread.insertId,
+      action: "sent"
+    });
+
     res.json({ success: true, mail_id: mail.insertId });
 
   } catch (err) {
@@ -708,33 +721,45 @@ export const getMailUserSuggestions = async (req, res) => {
 
 /**
  * DELETE MAIL (THREAD BASED – SOFT DELETE)
- * DELETE /mails/:mailId
+ * DELETE /mails/:id   (id = threadId)
  */
 export const deleteMail = async (req, res) => {
-  const userId = req.user.id;
-  const { mailId } = req.params;
+  console.log("DELETE MAIL HIT");
+  console.log("REQ PARAMS:", req.params);
+
+  const userId = req.user?.id;
+  const threadId = req.params.id; // route se aa raha hai
+
+  console.log("THREAD ID:", threadId);
+  console.log("USER ID:", userId);
+
+  if (!threadId) {
+    return res.status(400).json({
+      success: false,
+      message: "Thread id missing"
+    });
+  }
 
   const conn = await pool.getConnection();
 
   try {
     await conn.beginTransaction();
 
-    // 1️⃣ Get thread_id of mail
-    const [[mail]] = await conn.query(
-      `SELECT thread_id FROM mails WHERE id = ?`,
-      [mailId]
+    // 1️⃣ Thread exist check
+    const [[thread]] = await conn.query(
+      `SELECT id FROM mail_threads WHERE id = ?`,
+      [threadId]
     );
 
-    if (!mail) {
+    if (!thread) {
+      await conn.rollback();
       return res.status(404).json({
         success: false,
-        message: "Mail not found"
+        message: "Thread not found"
       });
     }
 
-    const threadId = mail.thread_id;
-
-    // 2️⃣ Soft delete for RECIPIENT
+    // 2️⃣ RECIPIENT soft delete (JOIN required)
     await conn.query(
       `
       UPDATE mail_recipients mr
@@ -746,7 +771,7 @@ export const deleteMail = async (req, res) => {
       [threadId, userId]
     );
 
-    // 3️⃣ Soft delete for SENDER (self delete)
+    // 3️⃣ SENDER soft delete
     await conn.query(
       `
       UPDATE mails
@@ -759,13 +784,6 @@ export const deleteMail = async (req, res) => {
 
     await conn.commit();
 
-     emitToUser(userId, "mail:deleted", {
-      thread_id: mail.thread_id,
-      deleted_at: new Date()
-    });
-
-     res.json({ success: true });
-
     res.json({
       success: true,
       message: "Conversation removed successfully"
@@ -773,7 +791,8 @@ export const deleteMail = async (req, res) => {
 
   } catch (err) {
     await conn.rollback();
-    console.error(err);
+    console.error("DELETE MAIL ERROR:", err);
+
     res.status(500).json({
       success: false,
       message: "Delete failed"
@@ -782,6 +801,8 @@ export const deleteMail = async (req, res) => {
     conn.release();
   }
 };
+
+
 
 
 

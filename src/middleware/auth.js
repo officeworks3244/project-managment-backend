@@ -18,6 +18,7 @@ export const requireAuth = async (req, res, next) => {
       `
       SELECT 
         u.id,
+        u.status,
         r.name AS role,
         GROUP_CONCAT(p.name) AS permissions
       FROM users u
@@ -32,6 +33,10 @@ export const requireAuth = async (req, res, next) => {
 
     if (!rows.length) {
       return res.status(401).json({ message: "User not found" });
+    }
+
+    if (rows[0].status !== "active") {
+      return res.status(401).json({ message: "User inactive" });
     }
 
     req.user = {

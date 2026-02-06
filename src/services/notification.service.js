@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.js";
+import { broadcast, emitToUser } from "./socket.service.js";
 
 /**
  * GET ALL PROJECT MEMBER IDS (Helper)
@@ -49,9 +50,17 @@ export const createNotification = async ({
   entityType,
   entityId,
 }) => {
+  const safeEmit = (fn) => {
+    try {
+      fn();
+    } catch (err) {
+      console.warn("Socket emit skipped:", err?.message || err);
+    }
+  };
+
   if (!userIds || userIds.length === 0) {
     // Broadcast notification - send to all users
-    await pool.query(
+    const [result] = await pool.query(
       `
       INSERT INTO notifications 
       (user_id, title, message, type, entity_type, entity_id)
@@ -59,6 +68,17 @@ export const createNotification = async ({
       `,
       [title, message, type, entityType, entityId]
     );
+
+    const payload = {
+      id: result.insertId,
+      user_id: null,
+      title,
+      message,
+      type,
+      entity_type: entityType,
+      entity_id: entityId,
+    };
+    safeEmit(() => broadcast("notification:new", payload));
     return;
   }
 
@@ -67,7 +87,7 @@ export const createNotification = async ({
 
   // Insert for each specific user
   for (const userId of uniqueUserIds) {
-    await pool.query(
+    const [result] = await pool.query(
       `
       INSERT INTO notifications 
       (user_id, title, message, type, entity_type, entity_id)
@@ -75,5 +95,16 @@ export const createNotification = async ({
       `,
       [userId, title, message, type, entityType, entityId]
     );
+
+    const payload = {
+      id: result.insertId,
+      user_id: userId,
+      title,
+      message,
+      type,
+      entity_type: entityType,
+      entity_id: entityId,
+    };
+    safeEmit(() => emitToUser(userId, "notification:new", payload));
   }
 };
